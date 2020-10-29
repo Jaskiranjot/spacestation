@@ -1,0 +1,62 @@
+<!--satellite live view-->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
+    integrity="sha512-xodZBNTC5n17Xt2atTPuE1HxjVMSvLVW9ocqUKLsCC5CXdbqCmblAshOMAS6/keqq/sMZMZ19scR4PsZChSR7A=="
+    crossorigin=""/>
+     <!-- Make sure you put this AFTER Leaflet's CSS -->
+ <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
+ integrity="sha512-XQoYMqMTK8LvdxXYG3nZ448hOEQiglfqkJs1NOQV44cWnUrBc8PkAOcXy20w0vlaXaVUearIOBhiXZ5V3ynxwA=="
+ crossorigin=""></script>
+    <title>Data/API</title>
+</head>
+<body>
+    <h1>where is the ISS</h1>
+    <p> longitude: <span id="lon"></span> <br>
+        latitude: <span id="lat"></span> </p>
+
+        <div id="issMap" style="height: 180px;"></div>
+    <script>
+        var mymap = L.map('issMap').setView([0,0],1);
+        var issIcon = L.icon({
+                        iconUrl: 'download.jpg',
+                        iconSize: [50, 32],
+                        iconAnchor: [25, 16],
+                        popupAnchor: [-3, -76],
+                        
+                    });
+       
+        const attribution = '&copy; <a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>'
+        const tileUrl ='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+        const tiles = L.tileLayer(tileUrl,{attribution});
+        tiles.addTo(mymap )
+
+        const api_url= 'https://api.wheretheiss.at/v1/satellites/25544';
+       let firstTime = true;
+        async function getIss () {
+            const response = await fetch(api_url); 
+            const data = await response.json();
+            console.log(data.longitude )
+            const { latitude, longitude } = data;
+
+            L.marker([latitude, longitude], {icon : issIcon}).addTo(mymap);
+            if (firstTime) {
+            mymap.setView([latitude, longitude], 2)
+            firstTime =false;
+            }
+            console.log(latitude);
+            console.log(longitude);
+            document.getElementById('lat').textContent = latitude.toFixed(2);
+            document.getElementById('lon').textContent = longitude.toFixed(2);
+        }
+
+        getIss();
+       // setInterval(getIss, 000)
+    </script>
+    
+</body>
+</html>
